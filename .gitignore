@@ -90,3 +90,5 @@ target/
 
 # virtual environment
 yt-com
+/lgbm_model.pkl
+/tfidf_vectorizer.pkl
