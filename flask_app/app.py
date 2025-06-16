@@ -1,5 +1,5 @@
 # app.py
-
+import os
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend before importing pyplot
 
@@ -18,7 +18,23 @@ from nltk.stem import WordNetLemmatizer
 from mlflow.tracking import MlflowClient
 import matplotlib.dates as mdates
 import dagshub
-dagshub.init(repo_owner='MihirPrajapati04', repo_name='yt-comment-sentiment-analysis', mlflow=True)
+from dotenv import load_dotenv
+load_dotenv()
+# dagshub.init(repo_owner='MihirPrajapati04', repo_name='yt-comment-sentiment-analysis', mlflow=True)
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "MihirPrajapati04"
+repo_name = "yt-comment-sentiment-analysis"
+
+
 
 
 app = Flask(__name__)
@@ -56,7 +72,7 @@ def preprocess_comment(comment):
 # Load the model and vectorizer from the model registry and local storage
 def load_model_and_vectorizer(model_name, model_version, vectorizer_path):
     # Set MLflow tracking URI to your server
-    mlflow.set_tracking_uri("https://dagshub.com/MihirPrajapati04/yt-comment-sentiment-analysis.mlflow")  
+    mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')  
     client = MlflowClient()
     model_uri = f"models:/{model_name}/{model_version}"
     model = mlflow.pyfunc.load_model(model_uri)
